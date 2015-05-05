@@ -6,13 +6,18 @@ var application_root = __dirname,
 
 mongoose.connect('mongodb://localhost/library_database');
 
+var Keywords = new mongoose.Schema({
+    keyword: String
+});
+
 var Book = new mongoose.Schema({
 	title: String,
 	author: String,
-	releaseDate: Date
+	releaseDate: Date,
+	keywords: [ Keywords ]
 });
 
-var BookModel = mongoose.model('Book',Book);
+var BookModel = mongoose.model('Book', Book);
 
 var app = express();
 
@@ -42,19 +47,65 @@ app.get('/api/books', function(req,res){
 	})
 })
 
-app.post('/api/books', function(req,res){
-	var book = new BookModel({
-		title: req.body.title,
-		author: req.body.author,
-		releaseDate: req.body.releaseDate
-	});
+app.post( '/api/books', function( request, response ) {
+    var book = new BookModel({
+        title: request.body.title,
+        author: request.body.author,
+        releaseDate: request.body.releaseDate,
+        keywords: request.body.keywords       // NEW
+    });
+    book.save( function( err ) {
+        if( !err ) {
+            console.log( 'created' );
+            return response.send( book );
+        } else {
+            return console.log( err );
+        }
+    });
+});
 
-	return book.save(function(err){
-		if(!err){
-			console.log('created');
-			return res.send(book);
-		} else {
-			console.log(err);
-		}
-	})
-})
+
+app.get( '/api/books/:id', function( request, response ) {
+    return BookModel.findById( request.params.id, function( err, book ) {
+        if( !err ) {
+            return response.send( book );
+        } else {
+            return console.log( err );
+        }
+    });
+});
+
+app.put( '/api/books/:id', function( request, response ) {
+    console.log( 'Updating book ' + request.body.title );
+    return BookModel.findById( request.params.id, function( err, book ) {
+        book.title = request.body.title;
+        book.author = request.body.author;
+        book.releaseDate = request.body.releaseDate;
+        book.keywords = request.body.keywords; // NEW
+
+        return book.save( function( err ) {
+            if( !err ) {
+                console.log( 'book updated' );
+            } else {
+                console.log( err );
+            }
+            return response.send( book );
+        });
+    });
+});
+
+app.delete( '/api/books/:id', function( request, response ) {
+    console.log( 'Deleting book with id: ' + request.params.id );
+    return BookModel.findById( request.params.id, function( err, book ) {
+        return book.remove( function( err ) {
+            if( !err ) {
+                console.log( 'Book removed' );
+                return response.send( '' );
+            } else {
+                console.log( err );
+            }
+        });
+    });
+});
+
+
