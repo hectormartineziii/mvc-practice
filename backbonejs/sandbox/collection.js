@@ -1,7 +1,6 @@
 var app = app || {}
 app.TodoList = Backbone.Collection.extend({
     model: app.Todo,
-    localStorage: new Store("Backbone-todo"),
    	completed: function () {
 		return this.filter(function(todo){
 			return todo.get('completed');
