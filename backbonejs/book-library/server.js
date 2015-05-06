@@ -33,14 +33,14 @@ app.listen(port, function(){
 		port, app.settings.env)
 })
 
-app.get('/api', function(req, res){
-	res.send('Library API is running');
+app.get('/api', function(request, response){
+	response.send('Library API is running');
 });
 
-app.get('/api/books', function(req,res){
+app.get('/api/books', function(request,response){
 	return BookModel.find(function(err,books){
 		if(!err){
-			return res.send(books);
+			return response.send(books);
 		} else {
 			return console.log(err);
 		}
@@ -78,6 +78,7 @@ app.get( '/api/books/:id', function( request, response ) {
 app.put( '/api/books/:id', function( request, response ) {
     console.log( 'Updating book ' + request.body.title );
     return BookModel.findById( request.params.id, function( err, book ) {
+        console.log(book);
         book.title = request.body.title;
         book.author = request.body.author;
         book.releaseDate = request.body.releaseDate;
